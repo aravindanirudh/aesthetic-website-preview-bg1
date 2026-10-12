@@ -1,0 +1,29 @@
+{
+  "name": "aesthetic-website-preview",
+  "version": "1.0.0",
+  "description": "Cinematic website showcase video template built with Remotion",
+  "remotion": {
+    "entryPoint": "src/index.tsx"
+  },
+  "scripts": {
+    "preview": "npx remotion studio src/index.tsx",
+    "render": "npx remotion render src/index.tsx CinematicShowcase out/showcase.mp4",
+    "render:hq": "npx remotion render src/index.tsx CinematicShowcase out/showcase.mp4 --crf=18"
+  },
+  "keywords": [],
+  "type": "commonjs",
+  "dependencies": {
+    "@remotion/cli": "4.0.290",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "remotion": "4.0.290"
+  },
+  "allowScripts": {
+    "esbuild@0.25.0": true
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "typescript": "^5.4.5"
+  }
+}
