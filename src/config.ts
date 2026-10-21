@@ -4,23 +4,19 @@
  * Customize everything here without touching core composition code:
  * 1. Change TITLE_TEXT to customize the text overlay in the scene.
  * 2. Put your screen recording video in /public/ and set SCREEN_RECORDING_SRC.
- * 3. Update RECORDING_WIDTH / RECORDING_HEIGHT if your video resolution is different.
+ * 3. Put your poster video in /public/ and set POSTER_VIDEO_SRC.
+ * 4. Update coordinates or dimensions if you use different media.
  */
 
 // ─── Editable Scene Text ──────────────────────────────────────────────────────
 
 /**
- * The text overlay displayed in the warm sunset glow on the wall.
+ * The text/caption overlay displayed at the bottom part of the scene.
  * Supports multi-line strings with "\n".
- *
- * Example alternatives:
- *   "Designed & developed by me"
- *   "Built a high-converting\nlanding page for my client"
  */
-export const TITLE_TEXT =
-  "Portfolio so goated that it\nlanded an internship for my\nclient";
+export const TITLE_TEXT = "";
 
-// ─── Screen Recording Media ───────────────────────────────────────────────────
+// ─── Monitor Screen Recording Media ──────────────────────────────────────────
 
 /**
  * Name of your website recording MP4 inside the /public folder.
@@ -28,20 +24,30 @@ export const TITLE_TEXT =
 export const SCREEN_RECORDING_SRC = "screenRecording1.mp4";
 
 /** Width of the screen recording in pixels. */
-export const RECORDING_WIDTH = 1600;
+export const RECORDING_WIDTH = 1080;
 
 /** Height of the screen recording in pixels. */
-export const RECORDING_HEIGHT = 900;
+export const RECORDING_HEIGHT = 608;
+
+// ─── Poster Video Media ───────────────────────────────────────────────────────
+
+/**
+ * Name of your poster video MP4 inside the /public folder.
+ */
+export const POSTER_VIDEO_SRC = "poster_video.mp4";
+
+/** Width of the poster video canvas in pixels (standard portrait 9:16). */
+export const POSTER_WIDTH = 1080;
+
+/** Height of the poster video canvas in pixels (standard portrait 9:16). */
+export const POSTER_HEIGHT = 1920;
 
 // ─── Background Scene ─────────────────────────────────────────────────────────
 
 /**
  * Background scene photograph inside /public.
- * scene_clean.png is the high-res frame extracted directly from the reel,
- * with the screen display area prepared in solid dark-bezel tone to prevent
- * any white fringe / borders, and wall cleared for the editable title.
  */
-export const BACKGROUND_IMAGE_SRC = "scene_clean.png";
+export const BACKGROUND_IMAGE_SRC = "scene.png";
 
 // ─── Output Video Settings ────────────────────────────────────────────────────
 
@@ -58,18 +64,33 @@ export const VIDEO_FPS = 60;
  */
 export const DURATION_IN_FRAMES = 569;
 
-// ─── Laptop Screen Perspective Corners (1080 × 1920) ──────────────────────────
+// ─── Monitor Screen Perspective Corners (1080 × 1920) ─────────────────────────
 /**
- * Exact sub-pixel coordinates of the laptop screen display boundaries,
- * calibrated from highQualityScene1.png:
- *   TL: (91.0, 1005.1)
- *   TR: (1024.2, 948.5)
- *   BR: (1068.5, 1638.6)
- *   BL: (46.9, 1603.2)
+ * Exact sub-pixel coordinates of the LG monitor display boundaries calibrated
+ * from radial edge detection on the white monitor screen:
+ *   TL: (164.4, 569.7)
+ *   TR: (945.3, 615.4)
+ *   BR: (945.3, 1022.8)
+ *   BL: (167.5, 1053.3)
  */
 export const SCREEN_CORNERS = {
-  tl: { x: 91.0, y: 1005.1 },
-  tr: { x: 1024.2, y: 948.5 },
-  br: { x: 1068.5, y: 1638.6 },
-  bl: { x: 46.9, y: 1603.2 },
+  tl: { x: 165.3, y: 573.7 },
+  tr: { x: 944.6, y: 615.1 },
+  br: { x: 944.6, y: 1023.2 },
+  bl: { x: 167.6, y: 1053.1 },
+} as const;
+
+// ─── Wall Poster Perspective Corners (1080 × 1920) ────────────────────────────
+/**
+ * Exact sub-pixel coordinates of the framed poster on the wall above the monitor:
+ *   TL: (328.2, 42.5)
+ *   TR: (633.5, 82.2)
+ *   BR: (633.5, 487.8)
+ *   BL: (328.2, 469.9)
+ */
+export const POSTER_CORNERS = {
+  tl: { x: 328.2, y: 42.5 },
+  tr: { x: 633.5, y: 82.2 },
+  br: { x: 633.5, y: 487.8 },
+  bl: { x: 328.2, y: 469.9 },
 } as const;

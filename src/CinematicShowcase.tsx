@@ -14,33 +14,19 @@ import {
   SCREEN_RECORDING_SRC,
   RECORDING_WIDTH,
   RECORDING_HEIGHT,
+  POSTER_VIDEO_SRC,
+  POSTER_WIDTH,
+  POSTER_HEIGHT,
   BACKGROUND_IMAGE_SRC,
   SCREEN_CORNERS,
+  POSTER_CORNERS,
   VIDEO_WIDTH,
   VIDEO_HEIGHT,
 } from "./config";
 import { getPerspectiveTransformMatrix } from "./homography";
 
-// ─── Helper: build a CSS clip-path polygon from corner points ─────────────────
-function cornersToClipPath(
-  corners: typeof SCREEN_CORNERS,
-  canvasW: number,
-  canvasH: number
-): string {
-  const toPercent = (x: number, y: number) =>
-    `${((x / canvasW) * 100).toFixed(3)}% ${((y / canvasH) * 100).toFixed(3)}%`;
-
-  const { tl, tr, br, bl } = corners;
-  return `polygon(${[
-    toPercent(tl.x, tl.y),
-    toPercent(tr.x, tr.y),
-    toPercent(br.x, br.y),
-    toPercent(bl.x, bl.y),
-  ].join(", ")})`;
-}
-
-// ─── Editable Cinematic Reel Title Overlay ───────────────────────────────────
-const TitleOverlay: React.FC<{ frame: number; fps: number }> = ({
+// ─── Editable Cinematic Caption Overlay (Bottom part of image) ────────────────
+const CaptionOverlay: React.FC<{ frame: number; fps: number }> = ({
   frame,
   fps,
 }) => {
@@ -72,7 +58,7 @@ const TitleOverlay: React.FC<{ frame: number; fps: number }> = ({
     <div
       style={{
         position: "absolute",
-        top: 535,
+        bottom: 110,
         left: 0,
         right: 0,
         display: "flex",
@@ -90,13 +76,13 @@ const TitleOverlay: React.FC<{ frame: number; fps: number }> = ({
         style={{
           fontFamily:
             "system-ui, -apple-system, BlinkMacSystemFont, 'Montserrat', 'Syne', 'Arial Black', sans-serif",
-          fontSize: 54,
+          fontSize: 48,
           fontWeight: 900,
           color: "#FFBE1A",
           letterSpacing: "-0.015em",
           textAlign: "center",
           margin: 0,
-          lineHeight: 1.18,
+          lineHeight: 1.22,
           whiteSpace: "pre-line",
           maxWidth: 960,
           textShadow:
@@ -140,8 +126,8 @@ export const CinematicShowcase: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Compute 3D perspective homography matrix for the screen recording
-  const matrix3d = useMemo(() => {
+  // Compute 3D perspective homography matrix for the monitor screen recording
+  const screenMatrix3d = useMemo(() => {
     return getPerspectiveTransformMatrix(
       RECORDING_WIDTH,
       RECORDING_HEIGHT,
@@ -149,9 +135,13 @@ export const CinematicShowcase: React.FC = () => {
     );
   }, []);
 
-  // Compute clipping polygon to guarantee zero bezel bleed
-  const clipPath = useMemo(() => {
-    return cornersToClipPath(SCREEN_CORNERS, VIDEO_WIDTH, VIDEO_HEIGHT);
+  // Compute 3D perspective homography matrix for the poster video
+  const posterMatrix3d = useMemo(() => {
+    return getPerspectiveTransformMatrix(
+      POSTER_WIDTH,
+      POSTER_HEIGHT,
+      POSTER_CORNERS
+    );
   }, []);
 
   // Subtle camera drift and slow breathing zoom (coordinated scene motion)
@@ -169,14 +159,14 @@ export const CinematicShowcase: React.FC = () => {
 
   return (
     <AbsoluteFill style={{ backgroundColor: "#060608", overflow: "hidden" }}>
-      {/* ── Coordinated camera container: background + screen move together ── */}
+      {/* ── Coordinated camera container: background + screen + poster move together ── */}
       <AbsoluteFill
         style={{
           transform: `scale(${breathe}) translateY(${drift}px)`,
           transformOrigin: "50% 60%",
         }}
       >
-        {/* ── High-resolution background photograph ── */}
+        {/* ── High-resolution background scene photograph ── */}
         <AbsoluteFill>
           <Img
             src={staticFile(BACKGROUND_IMAGE_SRC)}
@@ -188,10 +178,112 @@ export const CinematicShowcase: React.FC = () => {
           />
         </AbsoluteFill>
 
-        {/* ── Screen replacement container with exact bezel clip-path ── */}
+        {/* ── High-precision anti-aliased SVG masks ── */}
+        <svg
+          style={{
+            position: "absolute",
+            width: 0,
+            height: 0,
+            pointerEvents: "none",
+          }}
+        >
+          <defs>
+            <filter id="softenMask" x="-5%" y="-5%" width="110%" height="110%">
+              <feGaussianBlur stdDeviation="0.4" />
+            </filter>
+            <mask
+              id="screenAntiAliasedMask"
+              maskUnits="userSpaceOnUse"
+              x="0"
+              y="0"
+              width={VIDEO_WIDTH}
+              height={VIDEO_HEIGHT}
+            >
+              <polygon
+                points={`${SCREEN_CORNERS.tl.x},${SCREEN_CORNERS.tl.y} ${SCREEN_CORNERS.tr.x},${SCREEN_CORNERS.tr.y} ${SCREEN_CORNERS.br.x},${SCREEN_CORNERS.br.y} ${SCREEN_CORNERS.bl.x},${SCREEN_CORNERS.bl.y}`}
+                fill="#ffffff"
+                filter="url(#softenMask)"
+              />
+            </mask>
+            <mask
+              id="posterAntiAliasedMask"
+              maskUnits="userSpaceOnUse"
+              x="0"
+              y="0"
+              width={VIDEO_WIDTH}
+              height={VIDEO_HEIGHT}
+            >
+              <polygon
+                points={`${POSTER_CORNERS.tl.x},${POSTER_CORNERS.tl.y} ${POSTER_CORNERS.tr.x},${POSTER_CORNERS.tr.y} ${POSTER_CORNERS.br.x},${POSTER_CORNERS.br.y} ${POSTER_CORNERS.bl.x},${POSTER_CORNERS.bl.y}`}
+                fill="#ffffff"
+                filter="url(#softenMask)"
+              />
+            </mask>
+          </defs>
+        </svg>
+
+        {/* ── Wall Poster replacement container with exact frame anti-aliased mask ── */}
         <AbsoluteFill
           style={{
-            clipPath,
+            WebkitMaskImage: "url(#posterAntiAliasedMask)",
+            maskImage: "url(#posterAntiAliasedMask)",
+            overflow: "hidden",
+          }}
+        >
+          {/* Black backing for poster bed */}
+          <div
+            style={{
+              position: "absolute",
+              width: "100%",
+              height: "100%",
+              backgroundColor: "#000",
+            }}
+          />
+          {/* Poster video transformed in 3D perspective */}
+          <div
+            style={{
+              position: "absolute",
+              left: 0,
+              top: 0,
+              width: POSTER_WIDTH,
+              height: POSTER_HEIGHT,
+              transformOrigin: "0 0",
+              transform: posterMatrix3d,
+              outline: "1px solid transparent",
+              WebkitBackfaceVisibility: "hidden",
+              backfaceVisibility: "hidden",
+            }}
+          >
+            <Video
+              src={staticFile(POSTER_VIDEO_SRC)}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                imageRendering: "auto",
+              }}
+              volume={0}
+            />
+          </div>
+          {/* Subtle poster frame glass reflection */}
+          <div
+            style={{
+              position: "absolute",
+              width: "100%",
+              height: "100%",
+              background:
+                "linear-gradient(145deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0) 45%, rgba(255,220,150,0.03) 100%)",
+              pointerEvents: "none",
+              mixBlendMode: "overlay",
+            }}
+          />
+        </AbsoluteFill>
+
+        {/* ── Monitor screen replacement container with exact bezel anti-aliased mask ── */}
+        <AbsoluteFill
+          style={{
+            WebkitMaskImage: "url(#screenAntiAliasedMask)",
+            maskImage: "url(#screenAntiAliasedMask)",
             overflow: "hidden",
           }}
         >
@@ -204,9 +296,8 @@ export const CinematicShowcase: React.FC = () => {
               backgroundColor: "#000",
             }}
           />
-          {/* Screen recording transformed in 3D perspective */}
-          <Video
-            src={staticFile(SCREEN_RECORDING_SRC)}
+          {/* Monitor screen recording transformed in 3D perspective */}
+          <div
             style={{
               position: "absolute",
               left: 0,
@@ -214,10 +305,23 @@ export const CinematicShowcase: React.FC = () => {
               width: RECORDING_WIDTH,
               height: RECORDING_HEIGHT,
               transformOrigin: "0 0",
-              transform: matrix3d,
+              transform: screenMatrix3d,
+              outline: "1px solid transparent",
+              WebkitBackfaceVisibility: "hidden",
+              backfaceVisibility: "hidden",
             }}
-            volume={0}
-          />
+          >
+            <Video
+              src={staticFile(SCREEN_RECORDING_SRC)}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                imageRendering: "auto",
+              }}
+              volume={0}
+            />
+          </div>
           {/* Subtle screen glass glare reflection */}
           <div
             style={{
@@ -225,25 +329,25 @@ export const CinematicShowcase: React.FC = () => {
               width: "100%",
               height: "100%",
               background:
-                "linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 40%, rgba(255,180,80,0.04) 100%)",
+                "linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 40%, rgba(255,180,80,0.03) 100%)",
               pointerEvents: "none",
               mixBlendMode: "overlay",
             }}
           />
         </AbsoluteFill>
 
-        {/* ── Subtle ambient light bloom ── */}
+        {/* ── Subtle ambient light bloom from monitor ── */}
         <ScreenGlow />
 
-        {/* ── Editable Reel Title Overlay (moves naturally with scene) ── */}
-        <TitleOverlay frame={frame} fps={fps} />
+        {/* ── Editable Caption Overlay at Bottom ── */}
+        <CaptionOverlay frame={frame} fps={fps} />
       </AbsoluteFill>
 
       {/* ── Cinematic corner vignette ── */}
       <AbsoluteFill
         style={{
           background:
-            "radial-gradient(ellipse 80% 85% at 50% 50%, transparent 62%, rgba(0,0,0,0.6) 100%)",
+            "radial-gradient(ellipse 80% 85% at 50% 50%, transparent 62%, rgba(0,0,0,0.5) 100%)",
           pointerEvents: "none",
         }}
       />
