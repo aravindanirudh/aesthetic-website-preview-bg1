@@ -21,13 +21,13 @@ export const TITLE_TEXT = "";
 /**
  * Name of your website recording MP4 inside the /public folder.
  */
-export const SCREEN_RECORDING_SRC = "screenRecording1.mp4";
+export const SCREEN_RECORDING_SRC = "screenRecording.mp4";
 
 /** Width of the screen recording in pixels. */
-export const RECORDING_WIDTH = 1080;
+export const RECORDING_WIDTH = 1600;
 
 /** Height of the screen recording in pixels. */
-export const RECORDING_HEIGHT = 608;
+export const RECORDING_HEIGHT = 900;
 
 // ─── Poster Video Media ───────────────────────────────────────────────────────
 
@@ -47,7 +47,7 @@ export const POSTER_HEIGHT = 1920;
 /**
  * Background scene photograph inside /public.
  */
-export const BACKGROUND_IMAGE_SRC = "scene.png";
+export const BACKGROUND_IMAGE_SRC = "scene-bw.png";
 
 // ─── Output Video Settings ────────────────────────────────────────────────────
 
@@ -62,7 +62,7 @@ export const VIDEO_FPS = 60;
  * Total duration of the composition in frames.
  * At 60 FPS: 569 frames = ~9.48s (matches screenRecording1.mp4).
  */
-export const DURATION_IN_FRAMES = 569;
+export const DURATION_IN_FRAMES = 1620;
 
 // ─── Monitor Screen Perspective Corners (1080 × 1920) ─────────────────────────
 /**

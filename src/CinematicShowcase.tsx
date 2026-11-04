@@ -263,6 +263,7 @@ export const CinematicShowcase: React.FC = () => {
                 imageRendering: "auto",
               }}
               volume={0}
+              loop
             />
           </div>
           {/* Subtle poster frame glass reflection */}
